@@ -1,0 +1,11 @@
+name: LoreAttributes
+main: me.nighteyes604.LoreAttributes.LoreAttributes
+version: 1.3
+description: Apply stats to weapons and armor!
+author: Nighteyes604
+softdepend: [Heroes, PermissionsHealth]
+commands:
+  hp:
+    description: Display health of yourself.
+  lorestats:
+    description: Display the stat benefits of your lore.
