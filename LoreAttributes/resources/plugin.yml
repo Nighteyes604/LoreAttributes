@@ -3,7 +3,7 @@ main: me.nighteyes604.LoreAttributes.LoreAttributes
 version: 1.3
 description: Apply stats to weapons and armor!
 author: Nighteyes604
-softdepend: [Heroes, PermissionsHealth]
+softdepend: [Heroes, PermissionsHealth, MobArena]
 commands:
   hp:
     description: Display health of yourself.
