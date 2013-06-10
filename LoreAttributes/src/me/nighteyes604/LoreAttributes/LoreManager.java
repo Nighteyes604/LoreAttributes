@@ -1,23 +1,22 @@
 package me.nighteyes604.LoreAttributes;
 
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.garbagemule.MobArena.MobArena;
+import com.garbagemule.MobArena.MobArenaHandler;
+import com.garbagemule.MobArena.MonsterManager;
+import com.garbagemule.MobArena.framework.Arena;
+import com.herocraftonline.heroes.Heroes;
 import net.bless.ph.PermissionsHealth;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
-import com.herocraftonline.heroes.Heroes;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LoreManager {
 	
@@ -40,8 +39,11 @@ public class LoreManager {
 	private boolean attackSpeedEnabled;
 	
 	private Heroes heroesHook;
-	
-	private Random generator;
+
+   private MobArenaHandler maHandler;
+
+
+    private Random generator;
 	
 	public LoreManager(LoreAttributes plugin) {
 		this.plugin=plugin;
@@ -70,8 +72,16 @@ public class LoreManager {
 		/*if(LoreAttributes.config.getBoolean("integration.heroes")) {
 			baseHPHook = Bukkit.getPluginManager().getPlugin("heroes");
 			heroesHook = (Heroes)baseHPHook;
-		} else*/ 		
-	}
+		} else*/
+
+        // Mob arena hook
+        Plugin maPlugin = (MobArena) Bukkit.getServer().getPluginManager().getPlugin("MobArena");
+        if (maPlugin == null)
+            return;
+
+        maHandler = new MobArenaHandler();
+        // End mob arena hook
+    }
 	
 	public void disable() {
 		attackSpeedEnabled=false;
@@ -438,7 +448,29 @@ public class LoreManager {
 			}
 			entity.setMaxHealth(getBaseHealth((Player)entity)+hpToAdd);
 		} else {
-			entity.resetMaxHealth();
+            if ((maHandler.isMonsterInArena(entity)) && (maHandler != null)) {
+                Arena arena = maHandler.getArenaWithMonster(entity);
+                MonsterManager monsterMng = arena.getMonsterManager();
+                Set<LivingEntity> monsterSet = monsterMng.getMonsters();
+                Set<LivingEntity> bossSet = monsterMng.getBossMonsters();
+                if (monsterSet.contains(entity)) {
+                    for (LivingEntity maEntity : monsterSet)
+                    {
+                        if (maEntity == entity)
+                            entity.setMaxHealth(maEntity.getMaxHealth());
+                    }
+                } else if (bossSet.contains(entity)) {
+                    for (LivingEntity maEntity : bossSet)
+                    {
+                        if (maEntity == entity)
+                            entity.setMaxHealth(maEntity.getMaxHealth());
+                    }
+                } else {
+                    entity.resetMaxHealth();
+                }
+            } else {
+                entity.resetMaxHealth();
+            }
 			entity.setMaxHealth(entity.getMaxHealth()+hpToAdd);
 		}
 	}
